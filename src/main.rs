@@ -1,30 +1,40 @@
 use taos_lib::{System, Commands,  FlightControlSys as fcs};
-use tokio;
+// use tokio;
 use std::time::Duration;
 
-#[tokio::main]
-async fn main() {
+fn main() {
     // Startup 
 
+    println!("Startup");
     let mut sys_state = System::State::new();
     let mut fcs = fcs::FCS::default();
+    fcs.init_hardware();
+    fcs.elevator_d_bound = [-90.0,90.0];
+    println!("Hardware initialized");
+    // println!("Current Deflection Setting: {}", fcs.elevator_d);
+    // println!("Current Hardware PW: {}", fcs.fc_hardware.l_elevator_servo.pos_pw);
 
     let mut d:f32 = 0.0;
     
     loop {
-        // Instantiate command collection
-        // let mut commands = Commands::CommandPacket::new();
+        println!("Setting elevator deflection: {d} deg.");
 
-        // commands.add(Commands::CommandType::SetSysMode, System::Mode::Startup);
+        fcs.set_elevator_deflection(d);
 
-        // println!("{:?}", commands.values);
+        println!("Current Deflection Setting: {}", fcs.elevator_d);
+        println!("Current Hardware pos: {}", fcs.fc_hardware.l_elevator_servo.pos);
+        println!("Current Hardware PW: {}", fcs.fc_hardware.l_elevator_servo.pos_pw);
 
-        fcs.set_elevator_deflection(d += 5.0);
         fcs.update();
+        println!("Sent flight control system update command.");
 
+        d+=5.0;
 
-        tokio::time::sleep(Duration::from_secs(1)).await;
-
+        std::thread::sleep(Duration::from_millis(250));
+        if d > 90.0 {
+            fcs.shutdown_hardware();
+            return;
+        }
     }
 
 
