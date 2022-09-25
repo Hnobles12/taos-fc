@@ -10,13 +10,20 @@ fn main() {
     let mut fcs = fcs::FCS::default();
     fcs.init_hardware();
     fcs.elevator_d_bound = [-90.0,90.0];
+
     println!("Hardware initialized");
     // println!("Current Deflection Setting: {}", fcs.elevator_d);
     // println!("Current Hardware PW: {}", fcs.fc_hardware.l_elevator_servo.pos_pw);
 
+    println!("Calibrating IMU");
+    fcs.telem_hardware.calibrate_at_rest();
+    println!("IMU Calibrated");
+
     let mut d:f32 = 0.0;
     
     loop {
+        println!("=====================================================================");
+        println!("IMU Reading: {:?}", fcs.get_telemetry());
         println!("Setting elevator deflection: {d} deg.");
 
         fcs.set_elevator_deflection(d);
@@ -30,7 +37,7 @@ fn main() {
 
         d+=5.0;
 
-        std::thread::sleep(Duration::from_millis(250));
+        std::thread::sleep(Duration::from_millis(1000));
         if d > 90.0 {
             fcs.shutdown_hardware();
             return;
