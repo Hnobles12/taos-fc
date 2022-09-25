@@ -6,3 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+# taos-lib = {git="https://github.com/Hnobles12/taos-lib.git", branch="main"}
+taos-lib = {path="../taos-lib"}
+tokio = { version = "1.21.1", features = ["full"] }
